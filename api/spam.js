@@ -1,4 +1,4 @@
-import { chromium } from 'playwright-core';
+import puppeteer from 'puppeteer';
 import cors from 'cors';
 
 // CORS middleware
@@ -59,7 +59,7 @@ export default async function handler(req, res) {
           return res.status(400).json({ error: 'Share count cannot exceed 100,000' });
         }
 
-        // Map cookies into Playwright-compatible format
+        // Map cookies into Puppeteer-compatible format
         const formattedCookies = cookies.map(({ key, value, domain, path }) => ({
           name: key,
           value,
@@ -69,7 +69,7 @@ export default async function handler(req, res) {
 
         let browser;
         try {
-          browser = await chromium.launch({
+          browser = await puppeteer.launch({
             headless: true,
             args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-gpu', '--single-process'],
           });
@@ -77,7 +77,7 @@ export default async function handler(req, res) {
           const page = await browser.newPage();
 
           // Set cookies
-          await page.context().addCookies(formattedCookies);
+          await page.setCookie(...formattedCookies);
 
           // Navigate to Facebook post
           await page.goto(fbLink, { waitUntil: 'domcontentloaded' });
@@ -102,7 +102,7 @@ export default async function handler(req, res) {
 
           return res.status(200).json({ message: `${sharedCount} shares completed successfully!` });
         } catch (err) {
-          console.error('Playwright error:', err);
+          console.error('Puppeteer error:', err);
           return res.status(500).json({ error: 'Automation failed' });
         } finally {
           if (browser) await browser.close();
