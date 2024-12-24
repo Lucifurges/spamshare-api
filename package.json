@@ -10,7 +10,7 @@
     "vercel-build": "npx puppeteer install"
   },
   "dependencies": {
-    "puppeteer": "^19.0.0",
+    "puppeteer": "^23.11.1",
     "cors": "^2.8.5"
   },
   "engines": {
