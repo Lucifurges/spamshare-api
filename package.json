@@ -6,7 +6,8 @@
   "main": "spam.js",
   "scripts": {
     "start": "node spam.js",
-    "deploy": "vercel deploy"
+    "deploy": "vercel deploy",
+    "vercel-build": "npx playwright install"
   },
   "dependencies": {
     "playwright": "^1.49.0",
