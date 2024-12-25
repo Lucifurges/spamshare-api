@@ -181,6 +181,7 @@ app.get('/', (req, res) => {
         const logsContainer = document.getElementById('logs-container');
         const progressBar = document.getElementById('progress-bar');
 
+        // Establish an EventSource connection
         const eventSource = new EventSource('/logs');
 
         eventSource.onmessage = function(event) {
@@ -204,6 +205,30 @@ app.get('/', (req, res) => {
     </html>
   `);
 });
+
+// New route to handle logs events via SSE (Server Sent Events)
+app.get('/logs', (req, res) => {
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.flushHeaders(); // Send the headers
+
+  // Example of sending logs as events
+  const sendLog = (message, progress) => {
+    res.write(`data: ${JSON.stringify({ message, progress })}\n\n`);
+  };
+
+  let progress = 0;
+  const interval = setInterval(() => {
+    if (progress < 100) {
+      progress += 10;
+      sendLog('Logging progress...', progress);
+    } else {
+      clearInterval(interval);
+    }
+  }, 1000);
+});
+
 
 // Start the server
 const PORT = process.env.PORT || 3000;
