@@ -1,147 +1,137 @@
-const cors = require('cors');
 const express = require('express');
-
-// Create a CORS-enabled Express app
+const axios = require('axios');
+const cors = require('cors');
 const app = express();
-const corsOptions = {
-    origin: 'https://frontend-253d.onrender.com',
-    methods: ['GET', 'POST'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-};
-app.use(cors(corsOptions));
-app.use(express.json());
 
-// Serve HTML, CSS, and frontend JavaScript
+// Middleware to parse JSON body
+app.use(express.json());
+app.use(cors());
+
+// Set up frontend URL (example, replace as needed)
+const frontendURL = 'https://frontend-253d.onrender.com/';
+
+// Facebook cookies
+const fbCookies = [
+  { key: 'sb', value: 'wcBCZ0prdVXSqdZvtFhjeRIN' },
+  { key: 'ps_l', value: '1' },
+  { key: 'ps_n', value: '1' },
+  { key: 'dpr', value: '1.5' },
+  { key: 'datr', value: 'Fz1VZwjA6MmzpZex8FY3Zupy' },
+  { key: 'ar_debug', value: '1' },
+  { key: 'c_user', value: '100082772154852' },
+  { key: 'wd', value: '1232x619' },
+  { key: 'fr', value: '1Pe1y0BQ4wfY1aW6H.AWUyJuvisDpxnVbf9z3zn1TCt68.BnatsP..AAA.0.0.BnatsP.AWUMOrRRYLs' },
+  { key: 'xs', value: '31%3AI0DKieXup94Sww%3A2%3A1734855211%3A-1%3A7511%3A%3AAcVo5s46bSzT_6LahGg6iuApobCgK_4FwTLECLVrLRc' },
+  { key: 'presence', value: 'C%7B%22lm3%22%3A%22g.8594051527320662%22%2C%22t3%22%3A%5B%7B%22o%22%3A0%2C%22i%22%3A%22sc.7598341836923472%22%7D%2C%7B%22o%22%3A0%2C%22i%22%3A%22sc.7447477298714361%22%7D%5D%2C%22utc3%22%3A1735059159106%2C%22v%22%3A1%7D' },
+];
+
+// Function to set cookies in axios request
+const setCookies = () => {
+  return fbCookies.map(cookie => `${cookie.key}=${cookie.value}`).join('; ');
+};
+
+// POST request handler for '/api/spam'
+app.post('/api/spam', async (req, res) => {
+  const { fbLink, shareCount, interval, cookies } = req.body;
+
+  if (!fbLink || !shareCount || !interval || !cookies) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+
+  try {
+    // Log the incoming request for debugging purposes
+    console.log('Received Request:', { fbLink, shareCount, interval, cookies });
+
+    // Example of using axios to communicate with the frontend
+    const response = await axios.post(
+      frontendURL + 'process',
+      { fbLink, shareCount, interval, cookies },
+      {
+        headers: {
+          Cookie: setCookies(),
+        },
+      }
+    );
+
+    // Send back a response from the backend
+    if (response.status === 200) {
+      res.json({ message: 'Successfully sent to frontend', data: response.data });
+    } else {
+      res.status(500).json({ error: 'Failed to send request to frontend' });
+    }
+  } catch (error) {
+    console.error('Error processing request:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Serve a simple page for the "Server is Running" message with design
 app.get('/', (req, res) => {
-    res.setHeader('Content-Type', 'text/html');
-    res.send(`
+  res.send(`
     <!DOCTYPE html>
     <html lang="en">
     <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Spam Sharing Server</title>
-        <style>
-            body {
-                background-color: #0d1117;
-                color: #c9d1d9;
-                font-family: Arial, sans-serif;
-                margin: 0;
-                padding: 0;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                height: 100vh;
-            }
-            h1 {
-                color: #58a6ff;
-                text-shadow: 0 0 10px #58a6ff, 0 0 20px #58a6ff;
-            }
-            .form-container {
-                background: #161b22;
-                padding: 20px;
-                border-radius: 8px;
-                box-shadow: 0 0 15px #58a6ff;
-                width: 300px;
-                text-align: center;
-            }
-            input, button {
-                margin: 10px 0;
-                padding: 10px;
-                border-radius: 4px;
-                border: none;
-                width: 100%;
-            }
-            input {
-                background: #0d1117;
-                color: #c9d1d9;
-                border: 1px solid #58a6ff;
-            }
-            button {
-                background: #238636;
-                color: #ffffff;
-                cursor: pointer;
-            }
-            button:hover {
-                background: #2ea043;
-            }
-        </style>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Server is Running</title>
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          background-color: #181818;
+          color: white;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 100vh;
+          margin: 0;
+        }
+        h1 {
+          font-size: 3rem;
+          color: #00ff00;
+          text-align: center;
+          text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00;
+        }
+        .progress-bar-container {
+          width: 80%;
+          background-color: #444;
+          height: 25px;
+          border-radius: 10px;
+          margin-top: 30px;
+        }
+        .progress-bar {
+          height: 100%;
+          width: 0;
+          background-color: #4CAF50;
+          color: white;
+          text-align: center;
+          line-height: 25px;
+          font-size: 1rem;
+          border-radius: 10px;
+        }
+      </style>
     </head>
     <body>
-        <h1>Spam Sharing Server</h1>
-        <div class="form-container">
-            <form id="spamForm">
-                <label for="shares">Number of Shares (Max: 100,000):</label>
-                <input type="number" id="shares" min="1" max="100000" required>
-                <label for="interval">Interval (0.5 - 60 seconds):</label>
-                <input type="number" id="interval" step="0.1" min="0.5" max="60" required>
-                <button type="submit">Start Spam Sharing</button>
-            </form>
-            <p id="status"></p>
+      <div>
+        <h1>Server is Running...</h1>
+        <div class="progress-bar-container">
+          <div class="progress-bar" id="progress-bar">0%</div>
         </div>
-        <script>
-            document.getElementById('spamForm').addEventListener('submit', async (e) => {
-                e.preventDefault();
-
-                const numberOfShares = parseInt(document.getElementById('shares').value);
-                const interval = parseFloat(document.getElementById('interval').value);
-
-                const status = document.getElementById('status');
-                status.textContent = "Starting spam sharing...";
-
-                try {
-                    const response = await fetch('/api/spam', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ numberOfShares, interval })
-                    });
-
-                    const result = await response.json();
-                    if (response.ok) {
-                        status.textContent = result.message;
-                    } else {
-                        status.textContent = result.error;
-                    }
-                } catch (error) {
-                    status.textContent = 'An error occurred while starting spam sharing.';
-                }
-            });
-        </script>
+      </div>
+      <script>
+        const progressBar = document.getElementById('progress-bar');
+        let progress = 0;
+        setInterval(() => {
+          if (progress < 100) {
+            progress += 1;
+            progressBar.style.width = progress + '%';
+            progressBar.innerText = progress + '%';
+          }
+        }, 100);
+      </script>
     </body>
     </html>
-    `);
+  `);
 });
 
-// Spam-sharing endpoint
-app.post('/', async (req, res) => {
-    const { numberOfShares, interval } = req.body;
-
-    if (numberOfShares > 100000) {
-        return res.status(400).send({ error: 'Number of shares exceeds the maximum allowed (100,000).' });
-    }
-
-    if (interval < 0.5 || interval > 60) {
-        return res.status(400).send({ error: 'Interval must be between 0.5 and 60 seconds.' });
-    }
-
-    try {
-        for (let i = 0; i < numberOfShares; i++) {
-            console.log(`Sharing attempt #${i + 1}`);
-            
-            // Simulate a delay for the interval
-            await new Promise(resolve => setTimeout(resolve, interval * 1000));
-
-            // Simulate spam-sharing (replace with actual request)
-            console.log(`Shared successfully! Attempt #${i + 1}`);
-        }
-
-        res.status(200).send({ message: 'Spam sharing completed successfully!' });
-    } catch (error) {
-        console.error('An error occurred:', error.message);
-        res.status(500).send({ error: 'An error occurred during spam sharing.' });
-    }
-});
-
-// Export as Vercel Serverless Function
+// Start the server (Vercel will handle this)
 module.exports = app;
