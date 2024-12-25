@@ -9,7 +9,7 @@
     "node": "22.x"
   },
   "dependencies": {
-    "cors": "^9.0.1",
+    "cors": "^2.8.5",
     "express": "^4.21.2",
     "axios": "^1.7.9"
   }
