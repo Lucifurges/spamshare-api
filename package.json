@@ -1,20 +1,16 @@
 {
-  "name": "spam-share-api",
+  "name": "spam-share",
   "version": "1.0.0",
-  "description": "A backend for spam sharing with Facebook cookies",
-  "main": "spam.js",
+  "main": "api/spam.js",
   "scripts": {
-    "start": "node spam.js"
+    "start": "node api/spam.js"
   },
   "engines": {
     "node": "22.x"
   },
   "dependencies": {
-    "express": "^4.18.2",
-    "axios": "^1.3.4",
-    "cors": "^2.8.5"
-  },
-  "devDependencies": {},
-  "author": "",
-  "license": "ISC"
+    "cors": "^9.0.1",
+    "express": "^4.21.2"
+    "axios": " ^1.7.9"
+  }
 }
