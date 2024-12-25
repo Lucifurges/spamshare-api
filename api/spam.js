@@ -1,137 +1,106 @@
-const express = require('express');
-const axios = require('axios');
-const cors = require('cors');
-const app = express();
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spam Share App</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Spam Share App</h1>
+    
+    <!-- Registration Form -->
+    <div id="registration-form">
+      <h2>Register</h2>
+      <form id="register-form">
+        <input type="text" id="username" placeholder="Username" required>
+        <input type="password" id="password" placeholder="Password" required>
+        <button type="submit">Register</button>
+      </form>
+    </div>
 
-// Middleware to parse JSON body
-app.use(express.json());
-app.use(cors());
+    <!-- Login Form -->
+    <div id="login-form">
+      <h2>Login</h2>
+      <form id="login-form">
+        <input type="text" id="login-username" placeholder="Username" required>
+        <input type="password" id="login-password" placeholder="Password" required>
+        <button type="submit">Login</button>
+      </form>
+    </div>
 
-// Set up frontend URL (example, replace as needed)
-const frontendURL = 'https://frontend-253d.onrender.com/';
+    <!-- Spam Share Form -->
+    <div id="spam-share-form" style="display:none;">
+      <h2>Spam Share</h2>
+      <form id="spam-form">
+        <input type="text" id="link" placeholder="Spam Link" required>
+        <input type="text" id="cookies" placeholder="Cookies" required>
+        <input type="number" id="shares" placeholder="Shares" required>
+        <input type="number" id="interval" placeholder="Interval in ms" required>
+        <button type="submit">Start Sharing</button>
+      </form>
+      <div id="progress" class="status"></div>
+    </div>
+  </div>
 
-// Facebook cookies
-const fbCookies = [
-  { key: 'sb', value: 'wcBCZ0prdVXSqdZvtFhjeRIN' },
-  { key: 'ps_l', value: '1' },
-  { key: 'ps_n', value: '1' },
-  { key: 'dpr', value: '1.5' },
-  { key: 'datr', value: 'Fz1VZwjA6MmzpZex8FY3Zupy' },
-  { key: 'ar_debug', value: '1' },
-  { key: 'c_user', value: '100082772154852' },
-  { key: 'wd', value: '1232x619' },
-  { key: 'fr', value: '1Pe1y0BQ4wfY1aW6H.AWUyJuvisDpxnVbf9z3zn1TCt68.BnatsP..AAA.0.0.BnatsP.AWUMOrRRYLs' },
-  { key: 'xs', value: '31%3AI0DKieXup94Sww%3A2%3A1734855211%3A-1%3A7511%3A%3AAcVo5s46bSzT_6LahGg6iuApobCgK_4FwTLECLVrLRc' },
-  { key: 'presence', value: 'C%7B%22lm3%22%3A%22g.8594051527320662%22%2C%22t3%22%3A%5B%7B%22o%22%3A0%2C%22i%22%3A%22sc.7598341836923472%22%7D%2C%7B%22o%22%3A0%2C%22i%22%3A%22sc.7447477298714361%22%7D%5D%2C%22utc3%22%3A1735059159106%2C%22v%22%3A1%7D' },
-];
+  <script>
+    let token = '';
 
-// Function to set cookies in axios request
-const setCookies = () => {
-  return fbCookies.map(cookie => `${cookie.key}=${cookie.value}`).join('; ');
-};
+    document.getElementById('register-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
 
-// POST request handler for '/api/spam'
-app.post('/api/spam', async (req, res) => {
-  const { fbLink, shareCount, interval, cookies } = req.body;
+      const res = await fetch('https://your-backend-url/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
+      });
 
-  if (!fbLink || !shareCount || !interval || !cookies) {
-    return res.status(400).json({ error: 'Missing required fields' });
-  }
+      const data = await res.json();
+      alert(data.message);
+    });
 
-  try {
-    // Log the incoming request for debugging purposes
-    console.log('Received Request:', { fbLink, shareCount, interval, cookies });
+    document.getElementById('login-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const username = document.getElementById('login-username').value;
+      const password = document.getElementById('login-password').value;
 
-    // Example of using axios to communicate with the frontend
-    const response = await axios.post(
-      frontendURL + 'process',
-      { fbLink, shareCount, interval, cookies },
-      {
-        headers: {
-          Cookie: setCookies(),
-        },
+      const res = await fetch('https://your-backend-url/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
+      });
+
+      const data = await res.json();
+      if (data.token) {
+        token = data.token;
+        document.getElementById('login-form').style.display = 'none';
+        document.getElementById('spam-share-form').style.display = 'block';
       }
-    );
+      alert(data.message);
+    });
 
-    // Send back a response from the backend
-    if (response.status === 200) {
-      res.json({ message: 'Successfully sent to frontend', data: response.data });
-    } else {
-      res.status(500).json({ error: 'Failed to send request to frontend' });
-    }
-  } catch (error) {
-    console.error('Error processing request:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
+    document.getElementById('spam-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const link = document.getElementById('link').value;
+      const cookies = document.getElementById('cookies').value;
+      const shares = document.getElementById('shares').value;
+      const interval = document.getElementById('interval').value;
 
-// Serve a simple page for the "Server is Running" message with design
-app.get('/', (req, res) => {
-  res.send(`
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Server is Running</title>
-      <style>
-        body {
-          font-family: Arial, sans-serif;
-          background-color: #181818;
-          color: white;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          height: 100vh;
-          margin: 0;
-        }
-        h1 {
-          font-size: 3rem;
-          color: #00ff00;
-          text-align: center;
-          text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00;
-        }
-        .progress-bar-container {
-          width: 80%;
-          background-color: #444;
-          height: 25px;
-          border-radius: 10px;
-          margin-top: 30px;
-        }
-        .progress-bar {
-          height: 100%;
-          width: 0;
-          background-color: #4CAF50;
-          color: white;
-          text-align: center;
-          line-height: 25px;
-          font-size: 1rem;
-          border-radius: 10px;
-        }
-      </style>
-    </head>
-    <body>
-      <div>
-        <h1>Server is Running...</h1>
-        <div class="progress-bar-container">
-          <div class="progress-bar" id="progress-bar">0%</div>
-        </div>
-      </div>
-      <script>
-        const progressBar = document.getElementById('progress-bar');
-        let progress = 0;
-        setInterval(() => {
-          if (progress < 100) {
-            progress += 1;
-            progressBar.style.width = progress + '%';
-            progressBar.innerText = progress + '%';
-          }
-        }, 100);
-      </script>
-    </body>
-    </html>
-  `);
-});
+      const res = await fetch('https://your-backend-url/api/spam', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ link, cookies, shares, interval, token }),
+      });
 
-// Start the server (Vercel will handle this)
-module.exports = app;
+      const data = await res.json();
+      document.getElementById('progress').innerText = data.message;
+    });
+  </script>
+</body>
+</html>
