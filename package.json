@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "cors": "^9.0.1",
-    "express": "^4.21.2"
-    "axios": " ^1.7.9"
+    "express": "^4.21.2",
+    "axios": "^1.7.9"
   }
 }
